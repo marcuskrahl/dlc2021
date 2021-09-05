@@ -1,5 +1,112 @@
+# Template zeigen
+
+# JavaScript
+
+1. Vorstellen des Codes
+
+1. ts-check aktivieren
+```typescript
+//@ts-check
+```
+
 # TypeScript
 
+1. Datei kopieren
+
+1. In Index.html target ändern
+
+1. erste typen ergänzen
+
+```typescript
+interface WebexMeeting {
+        type: 'webex';
+        title: string;
+        link: string;
+        participants: readonly string[];
+        from: Date;
+        till: Date;
+    }
+
+
+    interface SkypeMeeting {
+        type: 'skype';
+        title: string;
+        link: string;
+        participants: readonly { givenName: string, surname: string }[];
+        from: Date;
+        till: Date;
+    }
+
+
+    interface OnsiteMeeting {
+        type: 'onsite';
+        title: string;
+        room: string;
+        participants: readonly string[];
+        from: Date;
+        till: Date;
+    }
+
+
+    type Meeting = WebexMeeting | SkypeMeeting | OnsiteMeeting;
+
+    const data: readonly Meeting[] = []
+
+    //...
+
+    const helpUrls: Record<string, string> = {};
+
+
+```
+
+1. `noImplicitAny` aktivieren
+
+```typescript
+noImplicitAny: true
+```
+
+1. Funktionsparameter ergänzen
+
+1. Fehler in getMeetingParticipants beheben
+
+```typescript
+  function getMeetingParticipants(meeting) {
+        return meeting.participants.map(p => {
+            if (typeof p === 'string') {
+                return p;
+            }
+            return `${p.givenName} ${p.surname}`;
+        }).join(', ');
+    }
+```
+
+1. renderMeeting Fehler bei Room beheben
+
+```typescript
+if (meeting.type === 'onsite') {
+    blockElem.appendChild(renderMeetingDetail('Raum:', meeting.room));
+} else {
+    blockElem.appendChild(renderMeetingDetail('Einwahllink:', getMeetingLink(meeting)));
+}
+```
+
+1. renderMeetingDetail Fehler beheben
+
+```typescript
+if (typeof content === 'string') {
+    ddElem.textContent = content;
+} else {
+    ddElem.appendChild(content);
+}
+```
+
+1. `noImplicitReturns` aktivieren
+
+```typescript
+"noImplicitReturns": false,
+```
+
+1. Return types ergänzen
 
 1. tsconfig strict -> true
 
