@@ -134,6 +134,15 @@ if (container != undefined) {
 }
 ```
 
+
+1. Help Urls
+
+```typescript
+type MeetingTypes = Meeting['type'];
+type MeetingHelpUrls = Record<Exclude<MeetingTypes, 'onsite'>, string>;
+
+```
+
 1. helpUrls POJO
 ```
  const helpUrls: MeetingHelpUrls = {
@@ -151,13 +160,6 @@ if (helpElem != undefined) {
 }
 ```
 
-1. Help Urls
-
-```typescript
-type MeetingTypes = Meeting['type'];
-type MeetingHelpUrls = Record<Exclude<MeetingTypes, 'onsite'>, string>;
-
-```
 
 1. Unsupported Value Error
 ```typescript
