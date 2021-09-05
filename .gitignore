@@ -1,2 +1,4 @@
 typescript/**/*.js
 typescript/**/*.map
+rescript/**/*.js
+node_modules
