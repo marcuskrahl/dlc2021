@@ -94,9 +94,6 @@ var __extends = (this && this.__extends) || (function () {
     function isNameObject(obj) {
         return typeof obj === 'object' && typeof obj.name === 'string';
     }
-    function isNameArray(nameArray) {
-        return nameArray.length === 0 || typeof nameArray[0].name === 'string';
-    }
     function render() {
         clearContainer();
         for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {

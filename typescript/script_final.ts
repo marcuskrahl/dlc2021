@@ -132,11 +132,6 @@
         return typeof obj === 'object' && typeof (obj as { name?: unknown }).name === 'string';
     }
 
-
-    function isNameArray(nameArray: readonly unknown[]): nameArray is readonly { name: string }[] {
-        return nameArray.length === 0 || typeof (nameArray[0] as { name: unknown }).name === 'string';
-    }
-
     function render(): void {
         clearContainer();
 
