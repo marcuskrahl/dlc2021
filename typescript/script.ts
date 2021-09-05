@@ -29,16 +29,8 @@
         till: Date;
     }
 
-    interface TeamsMeeting {
-        type: 'teams';
-        title: string;
-        link: string;
-        participants: readonly { name: string }[];
-        from: Date;
-        till: Date;
-    }
 
-    type Meeting = WebexMeeting | SkypeMeeting | OnsiteMeeting | TeamsMeeting;
+    type Meeting = WebexMeeting | SkypeMeeting | OnsiteMeeting;
 
     const data: readonly Meeting[] = [
         {
@@ -68,26 +60,23 @@
             from: new Date(2021, 8, 16, 15, 0, 0),
             till: new Date(2021, 8, 16, 17, 0, 0),
         }
-    ] as const;
+    ];
 
-    type MeetingTypes = Meeting['type'];
-    type MeetingHelpUrls = Record<Exclude<MeetingTypes, 'onsite'>, string>;
+    const helpUrls: Record<string, string> = {};
 
-    const helpUrls: MeetingHelpUrls = {
-        webex: 'https://www.webex.com/',
-        teams: 'https://www.microsoft.com/de-de/microsoft-teams/group-chat-software',
-        skype: 'https://www.skype.com/de/business/'
+    function initHelpUrls() {
+        helpUrls['webex'] = 'https://www.webex.com/'; 
+        helpUrls['skype'] = 'https://www.skype.com/de/business'
     }
 
+    initHelpUrls();
 
     function getMeetingImageUrl(meeting: Meeting): string {
         const type = meeting.type;
         switch (type) {
             case 'webex': return 'content/webex.png';
             case 'skype': return 'content/skype4business.png';
-            case 'onsite': return 'content/mms.png';
-            case 'teams': return 'content/teams.png';
-            default: throw new UnsupportedValueError(type);
+            case 'onsite': return 'content/mms.png';            
         }
     }
 
@@ -97,8 +86,6 @@
             case 'webex': return 'WebEx';
             case 'skype': return 'Skype for Business';
             case 'onsite': return 'Vor Ort';
-            case 'teams': return 'Microsoft Teams';
-            default: throw new UnsupportedValueError(type);
         }
     }
 
@@ -121,16 +108,11 @@
             if (typeof p === 'string') {
                 return p;
             }
-            if (isNameObject(p)) {
-                return p.name;
-            }
             return `${p.givenName} ${p.surname}`;
         }).join(', ');
     }
 
-    function isNameObject(obj: unknown): obj is { name: string } {
-        return typeof obj === 'object' && typeof (obj as { name?: unknown }).name === 'string';
-    }
+   
 
     function render(): void {
         clearContainer();
@@ -143,10 +125,7 @@
     }
 
     function clearContainer(): void {
-        const container = document.getElementById('meeting-block-container');
-        if (container != undefined) {
-            container.innerHTML = '';
-        }
+        document.getElementById('meeting-block-container').innerHTML = '';
     }
 
     function renderMeeting(meeting: Meeting): HTMLElement {
@@ -177,10 +156,7 @@
         }
         blockElem.appendChild(renderMeetingDetail('Teilnehmer:', getMeetingParticipants(meeting)));
 
-        const helpElem = renderHelp(meeting);
-        if (helpElem != undefined) {
-            blockElem.appendChild(helpElem);
-        }
+        blockElem.appendChild(renderHelp(meeting));
 
         return blockElem;
     }
@@ -204,11 +180,7 @@
         return dlElem;
     }
 
-    function renderHelp(meeting: Meeting): HTMLElement | undefined {
-        if (meeting.type === 'onsite') {
-            return undefined;
-        }
-
+    function renderHelp(meeting: Meeting): HTMLElement {
         const aElem = document.createElement('a');
         aElem.textContent = '?';
         aElem.href = helpUrls[meeting.type];
@@ -219,16 +191,7 @@
     }
 
     function appendToContainer(element: HTMLElement): void {
-        const container = document.getElementById('meeting-block-container');
-        if (container != undefined) {
-            container.appendChild(element);
-        }
-    }
-
-    class UnsupportedValueError extends Error {
-        constructor(value: never) {
-            super(`This value is not supported: ${value}`)
-        }
+        document.getElementById('meeting-block-container').appendChild(element);
     }
 
     render();
