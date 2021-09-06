@@ -42,10 +42,6 @@ type normalizedMeeting = {
 }
 
 type meeting = | WebexMeeting(webexMeeting) | SkypeMeeting(skypeMeeting) | OnsiteMeeting(onsiteMeeting);
-/*let standup = {
-   
-}*/
-
 
 let data:list<meeting> = list{
     WebexMeeting({
@@ -66,7 +62,7 @@ let data:list<meeting> = list{
         till: Js.Date.makeWithYMDHMS(~year= 2021.,~month= 8.,~date= 16.,~hours= 12.,~minutes= 0.,~seconds= 0., ())
     }),
     OnsiteMeeting({
-        title: "Mitarbeitergespräch",
+        title: `Mitarbeitergespräch`,
         room: "F112",
         participants: ["Christin Chefin"],
         from: Js.Date.makeWithYMDHMS(~year= 2021.,~month= 8.,~date= 16.,~hours= 15., ~minutes= 0.,~seconds= 0., ()),
@@ -102,71 +98,49 @@ let normalizeMeeting = (meeting) => {
             m
         }
         | SkypeMeeting(s) => {
-            ()
+            let m: normalizedMeeting = {
+                title: s.title,
+                room: None,
+                link: Some(s.link),
+                participants: Js.Array.map(p => `${p.givenName} ${p.surname}`,s.participants),
+                label: "Skype for Business",
+                imageUrl: "content/skype4business.png",
+                helpUrl: Some(helpUrls.skype),
+                from: s.from,
+                till: s.till
+            }
+            m
         }
         | OnsiteMeeting(s) => {
-            ()
+            let m: normalizedMeeting = {
+                title: s.title,
+                room: Some(s.room),
+                link: None,
+                participants: s.participants,
+                label: "Vor Ort",
+                imageUrl: "content/mms.png",
+                helpUrl: None,
+                from: s.from,
+                till: s.till
+            }
+            m
         }
     }
 }
 
-let getMeetingImageUrl = (meeting) => {
-    switch (meeting) {
-        | WebexMeeting(_) => "content/webex.png"
-        | SkypeMeeting(_) => "content/skype4business.png"
-        | OnsiteMeeting(_) => "content/mms.png"
-    }
-}
-
-let getMeetingLabel = (meeting) => {
-    switch (meeting) {
-        | WebexMeeting(_) => "WebEx"
-        | SkypeMeeting(_) => "Skype for Business"
-        | OnsiteMeeting(_) => "Vor Ort"
-    }
-}
-
-let getMeetingTime = (meeting: meeting) => {
-    let from = switch(meeting) {
-        | SkypeMeeting(m) => m.from
-        | WebexMeeting(m) => m.from
-        | OnsiteMeeting(m) => m.from
-    }
-    let till = switch(meeting) {
-        | SkypeMeeting(m) => m.till
-        | WebexMeeting(m) => m.till
-        | OnsiteMeeting(m) => m.till
-    }
-    let fromString = Js.Date.toLocaleTimeString(from);
-    let tillString = Js.Date.toLocaleTimeString(till);
+let getMeetingTime = (meeting) => {
+    let fromString = Js.Date.toLocaleTimeString(meeting.from);
+    let tillString = Js.Date.toLocaleTimeString(meeting.till);
 
     `${fromString} Uhr - ${tillString} Uhr`;
 }
 
-let getMeetingTitle = (meeting) => {
-    switch(meeting) {
-        | SkypeMeeting(m) => m.title
-        | WebexMeeting(m) => m.title
-        | OnsiteMeeting(m) => m.title
-    }
-}
-
 
 let getMeetingParticipants = (meeting) => {
-    let participants = switch(meeting) {
-        | SkypeMeeting(m) => Js.Array.map(p => `${p.givenName} ${p.surname}`, m.participants)
-        | WebexMeeting(m) => m.participants
-        | OnsiteMeeting(m) => m.participants
-    }
-
-    Js.Array.joinWith(", ", participants)
+    Js.Array.joinWith(", ", meeting.participants)
 }
 
-let getMeetingLink = (meeting) => {
-    let link = switch(meeting) {
-        | SkypeMeeting(m) => m.link
-        | WebexMeeting(m) => m.link
-    }
+let getMeetingLink = (link) => {
     let aElem = Webapi.Dom.Document.createElement("a", Webapi.Dom.document);
     Webapi.Dom.Element.setAttribute("href", link, aElem);
     Webapi.Dom.Element.setTextContent(aElem, link);
@@ -200,11 +174,7 @@ let renderMeetingDetail = (label, content) => {
 }
 
 
-let renderHelp = (meeting) => {
-    let href = switch(meeting) {
-        | SkypeMeeting(_) => helpUrls.skype
-        | WebexMeeting(_) => helpUrls.webex
-    }
+let renderHelp = (href) => {
     let aElem = Webapi.Dom.Document.createElement("a", Webapi.Dom.document);
     Webapi.Dom.Element.setClassName(aElem, "help-link");
     Webapi.Dom.Element.setClassName(aElem, "help-link");
@@ -220,7 +190,7 @@ let renderMeeting = (meeting) => {
     Webapi.Dom.Element.setClassName(blockElem, "meeting-block");
 
     let imgElem = Webapi.Dom.Document.createElement("img", Webapi.Dom.document);
-    Webapi.Dom.Element.setAttribute("src", getMeetingImageUrl(meeting), imgElem);
+    Webapi.Dom.Element.setAttribute("src", meeting.imageUrl, imgElem);
     Webapi.Dom.Element.appendChild(imgElem, blockElem);
     
 
@@ -229,31 +199,35 @@ let renderMeeting = (meeting) => {
     Webapi.Dom.Element.appendChild(headerElem, blockElem);
 
     let labelElem = Webapi.Dom.Document.createElement("span", Webapi.Dom.document);
-    Webapi.Dom.Element.setTextContent(labelElem, `${getMeetingLabel(meeting)}: `);
+    Webapi.Dom.Element.setTextContent(labelElem, `${meeting.label}: `);
     Webapi.Dom.Element.appendChild(labelElem, blockElem);
 
     let titleElem = Webapi.Dom.Document.createElement("span", Webapi.Dom.document);
-    Webapi.Dom.Element.setTextContent(labelElem, getMeetingTitle(meeting));
+    Webapi.Dom.Element.setTextContent(labelElem, meeting.title);
     Webapi.Dom.Element.appendChild(titleElem, blockElem);
 
     Webapi.Dom.Element.appendChild(renderMeetingDetail("Uhrzeit:", StringContent(getMeetingTime(meeting))), blockElem);
 
-    switch(meeting) {
-        | OnsiteMeeting(m) => {
-            Webapi.Dom.Element.appendChild(renderMeetingDetail("Raum:", StringContent(m.room)), blockElem);
+    switch(meeting.room) {
+        | Some(room) => {
+            Webapi.Dom.Element.appendChild(renderMeetingDetail("Raum:", StringContent(room)), blockElem);
         }
-        | v => {
-            Webapi.Dom.Element.appendChild(renderMeetingDetail("Einwahllink:", ElementContent(getMeetingLink(v))), blockElem)
+        | None => ()
+    }
+    
+    switch(meeting.link) {
+        | Some(link) => {
+            Webapi.Dom.Element.appendChild(renderMeetingDetail("Einwahllink:", ElementContent(getMeetingLink(link))), blockElem)
         }
+        | None => ()
     }
 
     Webapi.Dom.Element.appendChild(renderMeetingDetail("Teilnehmer:", StringContent(getMeetingParticipants(meeting))), blockElem);
 
-    switch(meeting) {
-        | OnsiteMeeting(_) => ()
-        | v => Webapi.Dom.Element.appendChild(renderHelp(v), blockElem);
+    switch(meeting.helpUrl) {
+        | Some(helpUrl) => Webapi.Dom.Element.appendChild(renderHelp(helpUrl), blockElem);
+        | None => ()
     }
-
     blockElem
 }
 
@@ -270,7 +244,7 @@ let render = () => {
     clearContainer();
 
     Belt.List.forEach(data, meeting => {
-        let meetingElement = renderMeeting(meeting);
+        let meetingElement = renderMeeting(normalizeMeeting(meeting));
         appendToContainer(meetingElement);
     });
 
