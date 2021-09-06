@@ -2,3 +2,8 @@ typescript/**/*.js
 typescript/**/*.map
 rescript/**/*.js
 node_modules
+.ninja_log
+.compiler.log
+rescript/lib/**/*
+.bsb.lock
+.merlin

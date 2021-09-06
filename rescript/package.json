@@ -12,6 +12,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "bs-webapi": "^0.19.1",
     "rescript": "*"
   }
 }

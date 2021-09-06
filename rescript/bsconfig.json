@@ -6,11 +6,12 @@
     "subdirs" : true
   },
   "package-specs": {
-    "module": "commonjs",
+    "module": "es6-global",
     "in-source": true
   },
   "suffix": ".bs.js",
   "bs-dependencies": [
+    "bs-webapi"
   ],
   "warnings": {
     "error" : "+101"
