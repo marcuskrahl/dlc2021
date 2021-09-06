@@ -7,3 +7,5 @@ node_modules
 rescript/lib/**/*
 .bsb.lock
 .merlin
+elm/elm-stuff/**/*
+elm/elm.js

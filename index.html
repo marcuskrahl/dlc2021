@@ -15,7 +15,12 @@
         <main id="meeting-block-container">
         </main>
 
-        <script src="javascript/script_v2.js"></script>
+        <!--<script src="javascript/script_v2.js"></script>-->
         <!--<script type="module" src="rescript/src/Demo.bs.js"></script>-->
+
+        <script src="elm/elm.js"></script>
+        <script>
+            Elm.Main.init({ node: document.getElementById("meeting-block-container") });
+        </script>
     </body>
 </html>
