@@ -29,6 +29,18 @@ type onsiteMeeting = {
     till: Js.Date.t,
 }
 
+type normalizedMeeting = {
+    title: string,
+    room: option<string>,
+    link: option<string>,
+    participants: array<string>,
+    from: Js.Date.t,
+    till: Js.Date.t,
+    label: string,
+    helpUrl: option<string>,
+    imageUrl: string
+}
+
 type meeting = | WebexMeeting(webexMeeting) | SkypeMeeting(skypeMeeting) | OnsiteMeeting(onsiteMeeting);
 /*let standup = {
    
@@ -72,6 +84,31 @@ let helpUrls = {
     skype: "https://www.skype.com/de/business/"
 }
 
+
+let normalizeMeeting = (meeting) => {
+    switch (meeting) {
+        | WebexMeeting(s) => {
+            let m: normalizedMeeting = {
+                title: s.title,
+                room: None,
+                link: Some(s.link),
+                participants: s.participants,
+                label: "WebEx",
+                imageUrl: "content/webex.png",
+                helpUrl: Some(helpUrls.webex),
+                from: s.from,
+                till: s.till
+            }
+            m
+        }
+        | SkypeMeeting(s) => {
+            ()
+        }
+        | OnsiteMeeting(s) => {
+            ()
+        }
+    }
+}
 
 let getMeetingImageUrl = (meeting) => {
     switch (meeting) {
