@@ -3,3 +3,14 @@ switch fallthrough
 template types
 Strict null checks
 unsoundness
+
+
+Elm
+- Generierung von HTML
+- Compiler Nachrichten
+- Bundle Size
+
+Rescript
+- Sieht aus wie Typescript 
+- Ocaml Background
+- Bundle Size

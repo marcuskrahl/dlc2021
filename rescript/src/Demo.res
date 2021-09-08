@@ -135,15 +135,15 @@ let getMeetingTime = (meeting) => {
     `${fromString} Uhr - ${tillString} Uhr`;
 }
 
-let getMeetingParticipants = (meeting) => {
-    Js.Array.joinWith(", ", meeting.participants)
-}
-
 let getMeetingLink = (link) => {
     let aElem = Webapi.Dom.Document.createElement("a", Webapi.Dom.document);
     Webapi.Dom.Element.setAttribute("href", link, aElem);
     Webapi.Dom.Element.setTextContent(aElem, link);
     aElem
+}
+
+let getMeetingParticipants = (meeting) => {
+    Js.Array.joinWith(", ", meeting.participants)
 }
 
 let clearContainer = () => {

@@ -45,21 +45,22 @@
     };
 
     let normalizeMeeting = (meeting) => {
-        if (meeting.type === 'onsite') {
-            return {
-                ...meeting,
-                link: undefined,
-                label: 'Vor Ort',
-                imageUrl: 'content/mms.png'
-            };
-        } else if (meeting.type === 'skype') {
+        switch(meeting.type) {
+            case 'onsite':
+                return {
+                    ...meeting,
+                    link: undefined,
+                    label: 'Vor Ort',
+                    imageUrl: 'content/mms.png'
+                };
+        case 'skype':
             return {
                 ...meeting,
                 room: undefined,
                 label: 'Skype for Business',
                 imageUrl: 'content/skype4business.png'
             };
-        } else if (meeting.type === 'webex') {
+        case 'webex':
             return {
                 ...meeting,
                 room: undefined,
@@ -87,47 +88,8 @@
         return meeting.participants.join(', ');
     }   
 
-    let render = () => {
-        clearContainer();
-
-        for (let meeting of data) {
-            let meetingElement = renderMeeting(normalizeMeeting(meeting));
-            appendToContainer(meetingElement);
-        }
-
-    }
-
     let clearContainer = () => {
         document.getElementById('meeting-block-container').innerHTML = '';
-    }
-
-    let renderMeeting = (meeting) => {
-        let blockElem = document.createElement('div');
-        blockElem.classList.add('meeting-block');
-
-        let imgElem = document.createElement('img');
-        imgElem.src = meeting.imageUrl;
-        blockElem.appendChild(imgElem);
-
-        let headerElem = document.createElement('span');
-        headerElem.classList.add('header');
-        blockElem.appendChild(headerElem);
-
-        let labelElem = document.createElement('span');
-        labelElem.textContent = `${meeting.label}: `;
-        headerElem.appendChild(labelElem);
-
-        let titleElem = document.createElement('span');
-        titleElem.textContent = meeting.title;
-        headerElem.appendChild(titleElem);
-
-        blockElem.appendChild(renderMeetingDetail('Uhrzeit:', getMeetingTime(meeting)));
-        blockElem.appendChild(renderMeetingDetail('Einwahllink:', getMeetingLink(meeting)));
-        blockElem.appendChild(renderMeetingDetail('Teilnehmer:'.toLocaleLowerCase, getMeetingParticipants(meeting)));
-
-        blockElem.appendChild(renderHelp(meeting));
-
-        return blockElem;
     }
 
     /**
@@ -160,8 +122,48 @@
         return aElem;
     }
 
+    let renderMeeting = (meeting) => {
+        let blockElem = document.createElement('div');
+        blockElem.classList.add('meeting-block');
+
+        let imgElem = document.createElement('img');
+        imgElem.src = meeting.imageUrl;
+        blockElem.appendChild(imgElem);
+
+        let headerElem = document.createElement('span');
+        headerElem.classList.add('header');
+        blockElem.appendChild(headerElem);
+
+        let labelElem = document.createElement('span');
+        labelElem.textContent = `${meeting.label}: `;
+        headerElem.appendChild(labelElem);
+
+        let titleElem = document.createElement('span');
+        titleElem.textContent = meeting.title;
+        headerElem.appendChild(titleElem);
+
+        blockElem.appendChild(renderMeetingDetail('Uhrzeit:', getMeetingTime(meeting)));
+        blockElem.appendChild(renderMeetingDetail('Einwahllink:', getMeetingLink(meeting)));
+        blockElem.appendChild(renderMeetingDetail('Teilnehmer:'.toLocaleLowerCase, getMeetingParticipants(meeting)));
+
+        blockElem.appendChild(renderHelp(meeting));
+
+        return blockElem;
+    }
+
+
     let appendToContainer = (element) => {
         document.getElementById('meeting-block-container').appendChild(element);
+    }
+
+    let render = () => {
+        clearContainer();
+
+        data.forEach(meeting => {
+            let meetingElement = renderMeeting(normalizeMeeting(meeting));
+            appendToContainer(meetingElement);
+        })
+
     }
 
     render();
