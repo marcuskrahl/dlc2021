@@ -135,7 +135,6 @@ let getMeetingTime = (meeting) => {
     `${fromString} Uhr - ${tillString} Uhr`;
 }
 
-
 let getMeetingParticipants = (meeting) => {
     Js.Array.joinWith(", ", meeting.participants)
 }

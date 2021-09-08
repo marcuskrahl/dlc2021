@@ -40,29 +40,21 @@
 
     initHelpUrls();
 
-    function normalizeMeeting(meeting) {
-        const result = {};
-        if (meeting.type === 'onsite') {
-            return {
-                ...meeting,
-                link: undefined,
-                label: 'Vor Ort',
-                imageUrl: 'content/mms.png'
-            };
-        } else if (meeting.type === 'skype') {
-            return {
-                ...meeting,
-                room: undefined,
-                label: 'Skype for Business',
-                imageUrl: 'content/skype4business.png'
-            };
-        } else if (meeting.type === 'webex') {
-            return {
-                ...meeting,
-                room: undefined,
-                label: 'WebEx',
-                imageUrl: 'content/webex.png'
-            }
+    function getMeetingImageUrl(meeting) {
+        const type = meeting.type;
+        switch (type) {
+            case 'webex': return 'content/webex.png';
+            case 'skype': return 'content/skype4business.png';
+            case 'onsit': return 'content/mms.png';            
+        }
+    }
+
+    function getMeetingLabel(meeting) {
+        const type = meeting.type;
+        switch (type) {
+            case 'webex': return 'WebEx';
+            case 'skype': return 'Skype for Business';
+            case 'onsite': return 'Vor Ort';
         }
     }
 
@@ -88,7 +80,7 @@
         clearContainer();
 
         for (const meeting of data) {
-            const meetingElement = renderMeeting(normalizeMeeting(meeting));
+            const meetingElement = renderMeeting(meeting);
             appendToContainer(meetingElement);
         }
 
@@ -103,7 +95,7 @@
         blockElem.classList.add('meeting-block');
 
         const imgElem = document.createElement('img');
-        imgElem.src = meeting.imageUrl;
+        imgElem.src = getMeetingImageUrl(meeting);
         blockElem.appendChild(imgElem);
 
         const headerElem = document.createElement('span');
@@ -111,7 +103,7 @@
         blockElem.appendChild(headerElem);
 
         const labelElem = document.createElement('span');
-        labelElem.textContent = `${meeting.label}: `;
+        labelElem.textContent = `${getMeetingLabel(meeting)}: `;
         headerElem.appendChild(labelElem);
 
         const titleElem = document.createElement('span');

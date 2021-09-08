@@ -54,9 +54,25 @@ interface WebexMeeting {
 
     //...
 
-    const helpUrls: Record<string, string> = {};
+    type MeetingTypes = Meeting['type'];
+    type MeetingHelpUrls = Record<Exclude<MeetingTypes, 'onsite'>, string>;
+    const helpUrls: MeetingHelpUrls = {};
 
 
+```
+
+1. Mapping participants
+
+```typescript
+    participants: meeting.participants.map(p => `${p.givenName} ${p.surname}`)
+```
+
+1. getMeetingLink für Onsite
+
+```typescript
+        if (meeting.link == undefined) {
+            return undefined;
+        }
 ```
 
 1. `noImplicitAny` aktivieren
@@ -66,29 +82,6 @@ noImplicitAny: true
 ```
 
 1. Funktionsparameter ergänzen
-
-1. Fehler in getMeetingParticipants beheben
-
-```typescript
-  function getMeetingParticipants(meeting) {
-        return meeting.participants.map(p => {
-            if (typeof p === 'string') {
-                return p;
-            }
-            return `${p.givenName} ${p.surname}`;
-        }).join(', ');
-    }
-```
-
-1. renderMeeting Fehler bei Room beheben
-
-```typescript
-if (meeting.type === 'onsite') {
-    blockElem.appendChild(renderMeetingDetail('Raum:', meeting.room));
-} else {
-    blockElem.appendChild(renderMeetingDetail('Einwahllink:', getMeetingLink(meeting)));
-}
-```
 
 1. renderMeetingDetail Fehler beheben
 
@@ -100,18 +93,45 @@ if (typeof content === 'string') {
 }
 ```
 
-1. `noImplicitReturns` aktivieren
+1. renderMeetingDetail für HTML Elemente
 
 ```typescript
-"noImplicitReturns": false,
+if (typeof content === 'string') {
+    ddElem.textContent = content;
+} else {
+    ddElem.appendChild(content);
+}
 ```
 
-1. Return types ergänzen
+1. renderHelp für onsite
+```typescript
+        if (meeting.type === 'onsite') {
+            return undefined;
+        }
+```
 
 1. tsconfig strict -> true
 
 ```typescript
 strict: true
+```
+
+1. Element Rendering
+
+```typescript
+        let linkElem = getMeetingLink(meeting);
+        if (linkElem != undefined) {
+            blockElem.appendChild(renderMeetingDetail('Einwahllink:', linkElem));
+        }
+        if (meeting.room != undefined) {
+            blockElem.appendChild(renderMeetingDetail('Raum:', meeting.room));
+        }
+        blockElem.appendChild(renderMeetingDetail('Teilnehmer:', getMeetingParticipants(meeting)));
+
+        let helpElem = renderHelp(meeting);
+        if (helpElem != undefined) {
+            blockElem.appendChild(helpElem);
+        }
 ```
 
 1. clearContainer strict
@@ -135,22 +155,6 @@ if (container != undefined) {
 ```
 
 
-1. Help Urls
-
-```typescript
-type MeetingTypes = Meeting['type'];
-type MeetingHelpUrls = Record<Exclude<MeetingTypes, 'onsite'>, string>;
-
-```
-
-1. helpUrls POJO
-```
- const helpUrls: MeetingHelpUrls = {
-    webex: 'https://www.webex.com/',
-    skype: 'https://www.skype.com/de/business/'
-}
-```
-
 1. helpElem strict
 
 ```typescript
@@ -160,18 +164,6 @@ if (helpElem != undefined) {
 }
 ```
 
-
-1. Unsupported Value Error
-```typescript
-default: throw new UnsupportedValueError(type);
-
-
-class UnsupportedValueError extends Error {
-    constructor(value: never) {
-        super(`This value is not supported: ${value}`)
-    }
-}
-```
 
 
 1. Teams Typ ergänzen

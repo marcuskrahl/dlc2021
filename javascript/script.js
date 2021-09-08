@@ -1,7 +1,15 @@
-
 (function () {
 
-    const data = [
+
+    function add(a,b) {
+        return a + b;
+    }
+
+    let add2 = (a,b) => {
+        return a + b;
+    }
+
+    let data = [
         {
             type: 'webex',
             title: 'Standup',
@@ -31,82 +39,85 @@
         }
     ];
 
-    const helpUrls = {};
+    let helpUrls = {
+        webex: 'https://www.webex.com/',
+        skype: 'https://www.skype.com/de/business'
+    };
 
-    function initHelpUrls() {
-        helpUrls['webex'] = 'https://www.webex.com/'; 
-        helpUrls['skype'] = 'https://www.skype.com/de/business'
-    }
-
-    initHelpUrls();
-
-    function getMeetingImageUrl(meeting) {
-        const type = meeting.type;
-        switch (type) {
-            case 'webex': return 'content/webex.png';
-            case 'skype': return 'content/skype4business.png';
-            case 'onsit': return 'content/mms.png';            
+    let normalizeMeeting = (meeting) => {
+        if (meeting.type === 'onsite') {
+            return {
+                ...meeting,
+                link: undefined,
+                label: 'Vor Ort',
+                imageUrl: 'content/mms.png'
+            };
+        } else if (meeting.type === 'skype') {
+            return {
+                ...meeting,
+                room: undefined,
+                label: 'Skype for Business',
+                imageUrl: 'content/skype4business.png'
+            };
+        } else if (meeting.type === 'webex') {
+            return {
+                ...meeting,
+                room: undefined,
+                label: 'WebEx',
+                imageUrl: 'content/webex.png'
+            }
         }
     }
 
-    function getMeetingLabel(meeting) {
-        const type = meeting.type;
-        switch (type) {
-            case 'webex': return 'WebEx';
-            case 'skype': return 'Skype for Business';
-            case 'onsite': return 'Vor Ort';
-        }
-    }
-
-    function getMeetingTime(meeting) {
-        const fromString = meeting.from.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
-        const tillString = meeting.till.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
+    let getMeetingTime = (meeting) => {
+        let fromString = meeting.from.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
+        let tillString = meeting.till.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
 
         return `${fromString} Uhr - ${tillString} Uhr`;
     }
 
-    function getMeetingLink(meeting) {
-        const aElem = document.createElement('a');
+    let getMeetingLink = (meeting) => {
+        let aElem = document.createElement('a');
         aElem.href = meeting.link;
         aElem.textContent = meeting.link;
         return aElem;
     }
 
-    function getMeetingParticipants(meeting) {
+    let getMeetingParticipants = (meeting) => {
         return meeting.participants.join(', ');
     }   
 
-    function render() {
+    let render = () => {
         clearContainer();
 
-        for (const meeting of data) {
-            const meetingElement = renderMeeting(meeting);
+        for (let meeting of data) {
+            let meetingElement = renderMeeting(normalizeMeeting(meeting));
             appendToContainer(meetingElement);
         }
 
     }
 
-    function clearContainer() {
+    let clearContainer = () => {
         document.getElementById('meeting-block-container').innerHTML = '';
     }
 
-    function renderMeeting(meeting) {
-        const blockElem = document.createElement('div');
+    let renderMeeting = (meeting) => {
+        let blockElem = document.createElement('div');
         blockElem.classList.add('meeting-block');
 
-        const imgElem = document.createElement('img');
-        imgElem.src = getMeetingImageUrl(meeting);
+        let imgElem = document.createElement('img');
+        imgElem.src = meeting.imageUrl;
         blockElem.appendChild(imgElem);
 
-        const headerElem = document.createElement('span');
+        let headerElem = document.createElement('span');
         headerElem.classList.add('header');
         blockElem.appendChild(headerElem);
 
-        const labelElem = document.createElement('span');
-        labelElem.textContent = `${getMeetingLabel(meeting)}: `;
+        let labelElem = document.createElement('span');
+        labelElem.textContent = `${meeting.label}: `;
         headerElem.appendChild(labelElem);
 
-        const titleElem = document.createElement('span');
+        let titleElem = document.createElement('span');
         titleElem.textContent = meeting.title;
         headerElem.appendChild(titleElem);
 
@@ -124,14 +135,14 @@
      * @param {string} label 
      * @returns 
      */
-    function renderMeetingDetail(label, content) {
-        const dlElem = document.createElement('dl');
+    let renderMeetingDetail = (label, content) => {
+        let dlElem = document.createElement('dl');
 
-        const dtElem = document.createElement('dt');
+        let dtElem = document.createElement('dt');
         dtElem.textContent = label;
         dlElem.appendChild(dtElem);
 
-        const ddElem = document.createElement('dd');
+        let ddElem = document.createElement('dd');
 
         ddElem.textContent = content;
         dlElem.appendChild(ddElem);
@@ -139,8 +150,8 @@
         return dlElem;
     }
 
-    function renderHelp(meeting) {
-        const aElem = document.createElement('a');
+    let renderHelp = (meeting) => {
+        let aElem = document.createElement('a');
         aElem.textContent = '?';
         aElem.href = helpUrls[meeting.type];
         aElem.classList.add('help-link');
@@ -149,7 +160,7 @@
         return aElem;
     }
 
-    function appendToContainer(element) {
+    let appendToContainer = (element) => {
         document.getElementById('meeting-block-container').appendChild(element);
     }
 
