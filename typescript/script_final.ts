@@ -1,5 +1,5 @@
-
 (function () {
+
     interface WebexMeeting {
         type: 'webex';
         title: string;
@@ -32,15 +32,27 @@
     interface TeamsMeeting {
         type: 'teams';
         title: string;
-        link: string;
-        participants: readonly { name: string }[];
+        room: string;
+        participants: readonly string[];
         from: Date;
         till: Date;
     }
 
+    interface NormalizedMeeting {
+        type: Meeting['type'];
+        title: string;
+        link?: string;
+        room?: string;
+        participants: readonly string[];
+        from: Date;
+        till: Date;
+        label: string;
+        imageUrl: string;
+    }
+
     type Meeting = WebexMeeting | SkypeMeeting | OnsiteMeeting | TeamsMeeting;
 
-    const data: readonly Meeting[] = [
+    let data: Meeting[] = [
         {
             type: 'webex',
             title: 'Standup',
@@ -68,131 +80,91 @@
             from: new Date(2021, 8, 16, 15, 0, 0),
             till: new Date(2021, 8, 16, 17, 0, 0),
         }
-    ] as const;
+    ];
 
     type MeetingTypes = Meeting['type'];
     type MeetingHelpUrls = Record<Exclude<MeetingTypes, 'onsite'>, string>;
-
-    const helpUrls: MeetingHelpUrls = {
+    let helpUrls: MeetingHelpUrls = {
         webex: 'https://www.webex.com/',
-        teams: 'https://www.microsoft.com/de-de/microsoft-teams/group-chat-software',
-        skype: 'https://www.skype.com/de/business/'
-    }
+        skype: 'https://www.skype.com/de/business',
+        teams: 'https://teams.microsoft.com'
+    };
 
-
-    function getMeetingImageUrl(meeting: Meeting): string {
-        const type = meeting.type;
-        switch (type) {
-            case 'webex': return 'content/webex.png';
-            case 'skype': return 'content/skype4business.png';
-            case 'onsite': return 'content/mms.png';
-            case 'teams': return 'content/teams.png';
-            default: throw new UnsupportedValueError(type);
+    function normalizeMeeting(meeting: Meeting) : NormalizedMeeting {
+        switch(meeting.type) {
+            case 'onsite':
+                return {
+                    ...meeting,
+                    link: undefined,
+                    label: 'Vor Ort',
+                    imageUrl: 'content/mms.png'
+                };
+        case 'skype':
+            return {
+                ...meeting,
+                room: undefined,
+                participants: meeting.participants.map(p => `${p.givenName} ${p.surname}`),
+                label: 'Skype for Business',
+                imageUrl: 'content/skype4business.png'
+            };
+        case 'webex':
+            return {
+                ...meeting,
+                room: undefined,
+                label: 'WebEx',
+                imageUrl: 'content/webex.png'
+            }
+        case 'teams':
+            return {
+                ...meeting,
+                room: undefined,
+                label: 'Microsoft Teams',
+                imageUrl: 'content/teams.png'
+            }
         }
     }
 
-    function getMeetingLabel(meeting: Meeting): string {
-        const type = meeting.type;
-        switch (type) {
-            case 'webex': return 'WebEx';
-            case 'skype': return 'Skype for Business';
-            case 'onsite': return 'Vor Ort';
-            case 'teams': return 'Microsoft Teams';
-            default: throw new UnsupportedValueError(type);
-        }
-    }
-
-    function getMeetingTime(meeting: Meeting): string {
-        const fromString = meeting.from.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
-        const tillString = meeting.till.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
+    let getMeetingTime = (meeting: NormalizedMeeting) => {
+        let fromString = meeting.from.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
+        let tillString = meeting.till.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
 
         return `${fromString} Uhr - ${tillString} Uhr`;
     }
 
-    function getMeetingLink(meeting: { link: string }): HTMLElement {
-        const aElem = document.createElement('a');
+    let getMeetingLink = (meeting: NormalizedMeeting) => {
+        if (meeting.link == null) {
+            return undefined;
+        }
+        let aElem = document.createElement('a');
         aElem.href = meeting.link;
         aElem.textContent = meeting.link;
         return aElem;
     }
 
-    function getMeetingParticipants(meeting: Meeting): string {
-        return meeting.participants.map(p => {
-            if (typeof p === 'string') {
-                return p;
-            }
-            if (isNameObject(p)) {
-                return p.name;
-            }
-            return `${p.givenName} ${p.surname}`;
-        }).join(', ');
+    let getMeetingParticipants = (meeting: NormalizedMeeting) => {
+        return meeting.participants.join(', ');
+    }   
+
+    let clearContainer = () => {
+        const elem = document.getElementById('meeting-block-container');
+        if (elem != null) {
+            elem.innerHTML = '';
+        };
     }
 
-    function isNameObject(obj: unknown): obj is { name: string } {
-        return typeof obj === 'object' && typeof (obj as { name?: unknown }).name === 'string';
-    }
+    /**
+     * Render a detail block
+     * @param {string} label 
+     * @returns 
+     */
+    let renderMeetingDetail = (label: string, content: string | HTMLElement) => {
+        let dlElem = document.createElement('dl');
 
-    function render(): void {
-        clearContainer();
-
-        for (const meeting of data) {
-            const meetingElement = renderMeeting(meeting);
-            appendToContainer(meetingElement);
-        }
-
-    }
-
-    function clearContainer(): void {
-        const container = document.getElementById('meeting-block-container');
-        if (container != undefined) {
-            container.innerHTML = '';
-        }
-    }
-
-    function renderMeeting(meeting: Meeting): HTMLElement {
-        const blockElem = document.createElement('div');
-        blockElem.classList.add('meeting-block');
-
-        const imgElem = document.createElement('img');
-        imgElem.src = getMeetingImageUrl(meeting);
-        blockElem.appendChild(imgElem);
-
-        const headerElem = document.createElement('span');
-        headerElem.classList.add('header');
-        blockElem.appendChild(headerElem);
-
-        const labelElem = document.createElement('span');
-        labelElem.textContent = `${getMeetingLabel(meeting)}: `;
-        headerElem.appendChild(labelElem);
-
-        const titleElem = document.createElement('span');
-        titleElem.textContent = meeting.title;
-        headerElem.appendChild(titleElem);
-
-        blockElem.appendChild(renderMeetingDetail('Uhrzeit:', getMeetingTime(meeting)));
-        if (meeting.type === 'onsite') {
-            blockElem.appendChild(renderMeetingDetail('Raum:', meeting.room));
-        } else {
-            blockElem.appendChild(renderMeetingDetail('Einwahllink:', getMeetingLink(meeting)));
-        }
-        blockElem.appendChild(renderMeetingDetail('Teilnehmer:', getMeetingParticipants(meeting)));
-
-        const helpElem = renderHelp(meeting);
-        if (helpElem != undefined) {
-            blockElem.appendChild(helpElem);
-        }
-
-        return blockElem;
-    }
-
-    function renderMeetingDetail(label: string, content: string | HTMLElement): HTMLElement {
-        const dlElem = document.createElement('dl');
-
-        const dtElem = document.createElement('dt');
+        let dtElem = document.createElement('dt');
         dtElem.textContent = label;
         dlElem.appendChild(dtElem);
 
-        const ddElem = document.createElement('dd');
+        let ddElem = document.createElement('dd');
 
         if (typeof content === 'string') {
             ddElem.textContent = content;
@@ -204,12 +176,11 @@
         return dlElem;
     }
 
-    function renderHelp(meeting: Meeting): HTMLElement | undefined {
+    let renderHelp = (meeting: NormalizedMeeting) => {
         if (meeting.type === 'onsite') {
             return undefined;
         }
-
-        const aElem = document.createElement('a');
+        let aElem = document.createElement('a');
         aElem.textContent = '?';
         aElem.href = helpUrls[meeting.type];
         aElem.classList.add('help-link');
@@ -218,17 +189,54 @@
         return aElem;
     }
 
-    function appendToContainer(element: HTMLElement): void {
-        const container = document.getElementById('meeting-block-container');
-        if (container != undefined) {
-            container.appendChild(element);
+    let renderMeeting = (meeting: NormalizedMeeting) => {
+        let blockElem = document.createElement('div');
+        blockElem.classList.add('meeting-block');
+
+        let imgElem = document.createElement('img');
+        imgElem.src = meeting.imageUrl;
+        blockElem.appendChild(imgElem);
+
+        let headerElem = document.createElement('span');
+        headerElem.classList.add('header');
+        blockElem.appendChild(headerElem);
+
+        let labelElem = document.createElement('span');
+        labelElem.textContent = `${meeting.label}: `;
+        headerElem.appendChild(labelElem);
+
+        let titleElem = document.createElement('span');
+        titleElem.textContent = meeting.title;
+        headerElem.appendChild(titleElem);
+
+        blockElem.appendChild(renderMeetingDetail('Uhrzeit:', getMeetingTime(meeting)));
+        let linkElem = getMeetingLink(meeting);
+        if (linkElem != undefined) {
+            blockElem.appendChild(renderMeetingDetail('Einwahllink:', linkElem));
         }
+        blockElem.appendChild(renderMeetingDetail('Teilnehmer:'.toLocaleLowerCase(), getMeetingParticipants(meeting)));
+
+        let helpElem = renderHelp(meeting);
+        if (helpElem != undefined) {
+            blockElem.appendChild(helpElem);
+        }
+
+        return blockElem;
     }
 
-    class UnsupportedValueError extends Error {
-        constructor(value: never) {
-            super(`This value is not supported: ${value}`)
-        }
+
+    let appendToContainer = (element: HTMLElement) => {
+        document.getElementById('meeting-block-container')?.appendChild(element);
+    }
+
+    let render = () => {
+        clearContainer();
+
+        data.forEach(meeting => {
+            let meetingElement = renderMeeting(normalizeMeeting(meeting));
+            appendToContainer(meetingElement);
+        })
+
     }
 
     render();

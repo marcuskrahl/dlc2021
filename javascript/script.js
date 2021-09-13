@@ -44,7 +44,7 @@
         skype: 'https://www.skype.com/de/business'
     };
 
-    let normalizeMeeting = (meeting) => {
+    function normalizeMeeting(meeting) {
         switch(meeting.type) {
             case 'onsite':
                 return {
