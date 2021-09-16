@@ -48,6 +48,19 @@ interface WebexMeeting {
     }
 
 
+
+    interface NormalizedMeeting {
+        type: Meeting['type'];
+        title: string;
+        link?: string;
+        room?: string;
+        participants: readonly string[];
+        from: Date;
+        till: Date;
+        label: string;
+        imageUrl: string;
+    }
+
     type Meeting = WebexMeeting | SkypeMeeting | OnsiteMeeting;
 
     const data: readonly Meeting[] = []
@@ -84,16 +97,6 @@ noImplicitAny: true
 1. Funktionsparameter ergänzen
 
 1. renderMeetingDetail Fehler beheben
-
-```typescript
-if (typeof content === 'string') {
-    ddElem.textContent = content;
-} else {
-    ddElem.appendChild(content);
-}
-```
-
-1. renderMeetingDetail für HTML Elemente
 
 ```typescript
 if (typeof content === 'string') {
@@ -214,3 +217,15 @@ if (isNameObject(p)) {
 ```
 
 1. `unsound.ts` erklären
+
+
+# Elm
+
+- Generierung von HTML
+- Compiler Nachrichten
+- Bundle Size
+
+# ReScript
+- Sieht aus wie Typescript 
+- Ocaml Background
+- Bundle Size
