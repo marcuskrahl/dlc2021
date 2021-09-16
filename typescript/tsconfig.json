@@ -1,12 +1,12 @@
 {
     "compilerOptions": {
       "module": "system",
-      "noImplicitAny": false,
+      "noImplicitAny": true,
       "noImplicitReturns": false,
       "removeComments": true,
       "preserveConstEnums": true,
       "sourceMap": true,
-      "strict": false
+      "strict": true
     },
     "include": ["**/*"],
     "exclude": ["node_modules", "**/*.spec.ts"]

@@ -1,5 +1,6 @@
-(function () {
+// @ts-check
 
+(function () {
 
     function add(a,b) {
         return a + b;
@@ -144,7 +145,7 @@
 
         blockElem.appendChild(renderMeetingDetail('Uhrzeit:', getMeetingTime(meeting)));
         blockElem.appendChild(renderMeetingDetail('Einwahllink:', getMeetingLink(meeting)));
-        blockElem.appendChild(renderMeetingDetail('Teilnehmer:'.toLocaleLowerCase, getMeetingParticipants(meeting)));
+        blockElem.appendChild(renderMeetingDetail('Teilnehmer:', getMeetingParticipants(meeting)));
 
         blockElem.appendChild(renderHelp(meeting));
 

@@ -6,4 +6,4 @@ numberOrStringArray.push(42);
 
 console.log(stringArray);
 
-//stringArray.forEach(s => s.toLocaleLowerCase())
+stringArray.forEach(s => s.toLocaleLowerCase())
